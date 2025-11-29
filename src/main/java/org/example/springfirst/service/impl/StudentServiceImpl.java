@@ -5,6 +5,7 @@ import org.example.springfirst.Dto.StudentDto;
 import org.example.springfirst.entity.Student;
 import org.example.springfirst.repository.StudentRepository;
 import org.example.springfirst.service.StudentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<StudentDto> getAllStudents() {
@@ -21,12 +23,14 @@ public class StudentServiceImpl implements StudentService {
         List<Student> students = studentRepository.findAll();
 
         return students.stream()
-                .map(student -> new StudentDto(
-                        student.getId(),
-                        student.getName(),
-                        student.getEmail()
-                ))
+                .map(student -> modelMapper.map(student, StudentDto.class))
                 .toList();
+    }
+
+    @Override
+    public StudentDto getStudentById(Long id) {
+        Student student = studentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student Not Found not with this id"));
+        return modelMapper.map(student, StudentDto.class);
     }
 
 }
